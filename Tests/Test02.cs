@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using System.Linq;
 using aoc2020.Code;
 using aoc2020.Helpers;
 using Shouldly;
