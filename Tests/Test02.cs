@@ -2,19 +2,11 @@ using aoc2020.Code;
 using aoc2020.Helpers;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace aoc2020.Tests
 {
-    public class Test02
+    public class Test02 : TestBase
     {
-        private readonly ITestOutputHelper _testOutputHelper;
-
-        public Test02(ITestOutputHelper testOutputHelper)
-        {
-            _testOutputHelper = testOutputHelper;
-        }
-
         [Fact]
         public void Part1()
         {
@@ -45,7 +37,7 @@ namespace aoc2020.Tests
             var solver = new Day02();
             var input = DataHelper.GetAllRows(2);
             var result = solver.Solve(input);
-            _testOutputHelper.WriteLine(result.ToString());
+            Output.WriteLine(result.ToString());
         }
 
         [Fact]
@@ -54,7 +46,7 @@ namespace aoc2020.Tests
             var solver = new Day02();
             var input = DataHelper.GetAllRows(2);
             var result = solver.Solve2(input);
-            _testOutputHelper.WriteLine(result.ToString());
+            Output.WriteLine(result.ToString());
         }
     }
 }

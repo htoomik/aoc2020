@@ -2,19 +2,11 @@ using System.Collections.Generic;
 using aoc2020.Code;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace aoc2020.Tests
 {
-    public class Test01
+    public class Test01 : TestBase
     {
-        private readonly ITestOutputHelper _testOutputHelper;
-
-        public Test01(ITestOutputHelper testOutputHelper)
-        {
-            _testOutputHelper = testOutputHelper;
-        }
-
         [Fact]
         public void Fact01()
         {
@@ -38,7 +30,7 @@ namespace aoc2020.Tests
             var sut = new Day01();
             var result = sut.Solve();
 
-            _testOutputHelper.WriteLine(result.ToString());
+            Output.WriteLine(result.ToString());
         }
 
         [Fact]
@@ -47,7 +39,7 @@ namespace aoc2020.Tests
             var sut = new Day01();
             var result = sut.Solve2();
 
-            _testOutputHelper.WriteLine(result.ToString());
+            Output.WriteLine(result.ToString());
         }
     }
 }
