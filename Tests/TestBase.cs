@@ -1,5 +1,4 @@
 using Xunit.Abstractions;
-using Xunit.Sdk;
 
 namespace aoc2020.Tests
 {
@@ -7,9 +6,9 @@ namespace aoc2020.Tests
     {
         protected ITestOutputHelper Output { get; }
 
-        protected TestBase()
+        protected TestBase(ITestOutputHelper helper)
         {
-            Output = new TestOutputHelper();
+            Output = helper;
         }
     }
 }

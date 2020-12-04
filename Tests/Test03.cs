@@ -2,11 +2,16 @@ using aoc2020.Code;
 using aoc2020.Helpers;
 using Shouldly;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace aoc2020.Tests
 {
     public class Test03 : TestBase
     {
+        public Test03(ITestOutputHelper helper) : base(helper)
+        {
+        }
+
         [Fact]
         public void Part1()
         {
