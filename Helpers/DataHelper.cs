@@ -6,6 +6,11 @@ namespace aoc2020.Helpers
 {
     public static class DataHelper
     {
+        public static string Get(int day)
+        {
+            return File.ReadAllText($"C:\\Code\\aoc2020\\Data\\input{day:00}.txt");
+        }
+
         public static List<string> GetAllRows(int day)
         {
             var lines = File.ReadAllLines($"C:\\Code\\aoc2020\\Data\\input{day:00}.txt");
