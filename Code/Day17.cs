@@ -1,5 +1,5 @@
+using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace aoc2020.Code
 {
@@ -14,46 +14,58 @@ namespace aoc2020.Code
                 state = Mutate(state);
             }
 
-            return state.Values.Count(v => v);
+            var count = Count(state);
+            return count;
         }
 
-        private Dictionary<Xyz, bool> Parse(List<string> input)
+        private Array Parse(List<string> input)
         {
-            var result = new Dictionary<Xyz, bool>();
+            const int minX = -1;
+            const int minY = -1;
+            const int minZ = -1;
+            var maxY = input.Count;
+            var maxX = input[0].Length;
+            const int maxZ = 1;
 
-            for (var y = 0; y < input.Count; y++)
+            var result = Array.CreateInstance(typeof(bool),
+                lengths: new[] { maxX - minX + 1, maxY - minY + 1, maxZ - minZ + 1 },
+                lowerBounds: new[] { minX, minY, minZ });
+
+            for (var y = 0; y < maxY; y++)
             {
-                for (var x = 0; x < input[0].Length; x++)
+                for (var x = 0; x < maxX; x++)
                 {
                     var value = input[y][x];
                     var on = value == '#';
-                    result.Add(new Xyz(x, y, 0), on);
+                    result.SetValue(on, x, y, 0);
                 }
             }
 
             return result;
         }
 
-        private Dictionary<Xyz, bool> Mutate(Dictionary<Xyz,bool> state)
+        private Array Mutate(Array state)
         {
-            var newState = new Dictionary<Xyz, bool>();
+            var minX = state.GetLowerBound(0) - 1;
+            var minY = state.GetLowerBound(1) - 1;
+            var minZ = state.GetLowerBound(2) - 1;
 
-            var minX = state.Keys.Min(k => k.X);
-            var minY = state.Keys.Min(k => k.Y);
-            var minZ = state.Keys.Min(k => k.Z);
+            var lengthX = state.GetLength(0) + 2;
+            var lengthY = state.GetLength(1) + 2;
+            var lengthZ = state.GetLength(2) + 2;
 
-            var maxX = state.Keys.Max(k => k.X);
-            var maxY = state.Keys.Max(k => k.Y);
-            var maxZ = state.Keys.Max(k => k.Z);
+            var newState = Array.CreateInstance(typeof(bool),
+                lengths: new[] { lengthX, lengthY, lengthZ },
+                lowerBounds: new[] { minX, minY, minZ });
 
-            for (var z = minZ - 1; z <= maxZ + 1; z++)
+            for (var z = minZ; z < minZ + lengthZ; z++)
             {
-                for (var y = minY - 1; y <= maxY + 1; y++)
+                for (var y = minY; y < minY + lengthY; y++)
                 {
-                    for (var x = minX - 1; x <= maxX + 1; x++)
+                    for (var x = minX; x < minX + lengthX; x++)
                     {
                         var newValue = GetValue(state, x, y, z);
-                        newState.Add(new Xyz(x, y, z), newValue);
+                        newState.SetValue(newValue, x, y, z);
                     }
                 }
             }
@@ -61,10 +73,24 @@ namespace aoc2020.Code
             return newState;
         }
 
-        private bool GetValue(Dictionary<Xyz,bool> state, in int x, in int y, in int z)
+        private bool GetValue(Array state, in int x, in int y, in int z)
         {
-            var xyz = new Xyz(x, y, z);
-            var currentValue = state.ContainsKey(xyz) && state[xyz];
+            if (x < state.GetLowerBound(0) || x > state.GetUpperBound(0))
+            {
+                return false;
+            }
+
+            if (y < state.GetLowerBound(1) || y > state.GetUpperBound(1))
+            {
+                return false;
+            }
+
+            if (z < state.GetLowerBound(2) || z > state.GetUpperBound(2))
+            {
+                return false;
+            }
+
+            var currentValue = GetBoolean(state, x, y, z);
             var count = GetActiveNeighboursCount(state, x, y, z);
 
             return currentValue
@@ -72,23 +98,42 @@ namespace aoc2020.Code
                 : count == 3;
         }
 
-        private static int GetActiveNeighboursCount(Dictionary<Xyz, bool> state, int x, int y, int z)
+        private static int GetActiveNeighboursCount(Array state, int x, int y, int z)
         {
             var count = 0;
             for (var diffX = -1; diffX <= 1; diffX++)
             {
+                var newX = x + diffX;
+                if (newX < state.GetLowerBound(0) || newX > state.GetUpperBound(0))
+                {
+                    continue;
+                }
+
                 for (var diffY = -1; diffY <= 1; diffY++)
                 {
+                    var newY = y + diffY;
+
+                    if (newY < state.GetLowerBound(1) || newY > state.GetUpperBound(1))
+                    {
+                        continue;
+                    }
+
                     for (var diffZ = -1; diffZ <= 1; diffZ++)
                     {
+                        var newZ = z + diffZ;
+
+                        if (newZ < state.GetLowerBound(2) || newZ > state.GetUpperBound(2))
+                        {
+                            continue;
+                        }
+
                         if (diffX == 0 && diffY == 0 && diffZ == 0)
                         {
                             continue;
                         }
 
-                        var xyz = new Xyz(x + diffX, y + diffY, z + diffZ);
-                        var exists = state.TryGetValue(xyz, out var value);
-                        if (exists && value)
+                        var value = GetBoolean(state, newX, newY, newZ);
+                        if (value)
                         {
                             count++;
                         }
@@ -99,18 +144,31 @@ namespace aoc2020.Code
             return count;
         }
 
-        private readonly struct Xyz
+        private int Count(Array state)
         {
-            public int X { get; }
-            public int Y { get; }
-            public int Z { get; }
-
-            public Xyz(int x, int y, int z)
+            var count = 0;
+            for (var x = state.GetLowerBound(0); x <= state.GetUpperBound(0); x++)
             {
-                X = x;
-                Y = y;
-                Z = z;
+                for (var y = state.GetLowerBound(1); y <= state.GetUpperBound(1); y++)
+                {
+                    for (var z = state.GetLowerBound(2); z <= state.GetUpperBound(2); z++)
+                    {
+                        var value = GetBoolean(state, x, y, z);
+                        if (value)
+                        {
+                            count++;
+                        }
+                    }
+                }
             }
+
+            return count;
+        }
+
+        private static bool GetBoolean(Array state, int x, int y, int z)
+        {
+            // ReSharper disable once PossibleNullReferenceException
+            return (bool)state.GetValue(x, y, z);
         }
     }
 }
