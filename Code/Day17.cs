@@ -1,18 +1,12 @@
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
 
 namespace aoc2020.Code
 {
     public class Day17
     {
-        private const string outputFile = "C:\\Code\\aoc2020\\log17.txt";
-
         public int Solve(List<string> input)
         {
-            File.Delete(outputFile);
-
             var state = Parse(input);
 
             for (var i = 0; i < 6; i++)
@@ -52,27 +46,17 @@ namespace aoc2020.Code
             var maxY = state.Keys.Max(k => k.Y);
             var maxZ = state.Keys.Max(k => k.Z);
 
-            var sb = new StringBuilder();
             for (var z = minZ - 1; z <= maxZ + 1; z++)
             {
-                sb.AppendLine($"Z={z}");
-
                 for (var y = minY - 1; y <= maxY + 1; y++)
                 {
                     for (var x = minX - 1; x <= maxX + 1; x++)
                     {
                         var newValue = GetValue(state, x, y, z);
                         newState.Add(new Xyz(x, y, z), newValue);
-                        sb.Append(newValue ? "#" : ".");
                     }
-
-                    sb.AppendLine();
                 }
             }
-
-            sb.AppendLine();
-            sb.AppendLine();
-            File.AppendAllText(outputFile, sb.ToString());
 
             return newState;
         }
