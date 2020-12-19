@@ -44,11 +44,14 @@ namespace aoc2020.Code
             var chunk = "";
             foreach (var c in input)
             {
-                if (c == '(') {
-                    parens++;
-                }
-                else if (c == ')') {
-                    parens--;
+                switch (c)
+                {
+                    case '(':
+                        parens++;
+                        break;
+                    case ')':
+                        parens--;
+                        break;
                 }
 
                 if (parens == 0 && separator == c)
@@ -61,9 +64,12 @@ namespace aoc2020.Code
                     chunk += c;
                 }
             }
-            if (chunk != "") {
+
+            if (chunk != "")
+            {
                 result.Add(chunk);
             }
+
             return result;
         }
     }
