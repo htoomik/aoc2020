@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text;
-using aoc2020.Helpers;
 
 namespace aoc2020.Code
 {
@@ -17,7 +15,7 @@ namespace aoc2020.Code
                   # 
 #    ##    ##    ###
  #  #  #  #  #  #   ";
-            return monster.ChopToList().Skip(1).Select(line => line.ToCharArray().ToList()).ToList();
+            return monster.Split("\r\n").Skip(1).Select(line => line.ToCharArray().ToList()).ToList();
         }
 
         public long Solve(string input)
@@ -38,41 +36,26 @@ namespace aoc2020.Code
         public int Solve2(string input)
         {
             var tiles = Parse(input);
-
-            WriteToFile("raw 1951", tiles.Single(t => t.Id == 1951).Data);
-
             var map = Puzzle(tiles);
-
-            var rotatedTiles = FitPieces(tiles, map);
-
-            WriteToFile("rotated 1951", rotatedTiles.Single(t => t.Id == 1951).Data);
-
+            var rotatedTiles = TransformTilesToFit(tiles, map);
             var trimmedTiles = rotatedTiles.Select(Trim).ToList();
-
-            WriteToFile("trimmed 1951", trimmedTiles.Single(t => t.Id == 1951).Data);
-
             var image = Assemble(map, trimmedTiles);
-
-            WriteToFile("original", image);
 
             var transforms = GetTransforms(image);
 
-            for (var index = 0; index < transforms.Count; index++)
+            foreach (var transform in transforms)
             {
-                var transform = transforms[index];
-                WriteToFile(index.ToString(), transform);
                 var (foundMonsters, markedMap) = FindMonsters(transform);
                 if (foundMonsters)
                 {
-                    var nonMonsters = CountNonMonsters(markedMap);
-                    return nonMonsters;
+                    return CountNonMonsters(markedMap);
                 }
             }
 
             throw new Exception();
         }
 
-        private List<Tile> FitPieces(List<Tile> tiles, List<List<int>> map)
+        private static List<Tile> TransformTilesToFit(List<Tile> tiles, List<List<int>> map)
         {
             var firstId = map[0][0];
             var secondId = map[0][1];
@@ -84,14 +67,10 @@ namespace aoc2020.Code
 
             var matchesBetweenFirstAndSecond = first.Sides.Where(s => second.Sides.Any(s2 => s == s2)).ToList();
 
-            if (matchesBetweenFirstAndSecond.Count != 2)
-            {
-                var s = string.Join(",", matchesBetweenFirstAndSecond);
-                throw new Exception(s);
-            }
+            // Two matches: both tiles right side up, and both flipped upside down. Pick whichever.
+            var matchingSide = matchesBetweenFirstAndSecond[0];
 
-            var matchingSide1 = matchesBetweenFirstAndSecond[0];
-            var fittedFirst = TransformSoRightSideIs(first, matchingSide1);
+            var fittedFirst = TransformSoRightSideIs(first, matchingSide);
 
             var matchesBetweenFirstAndBelow = below.Sides.Where(s => s == GetBottom(fittedFirst.Data)).ToList();
             if (matchesBetweenFirstAndBelow.Count == 0)
@@ -134,17 +113,17 @@ namespace aoc2020.Code
             return fittedTiles.Values.ToList();
         }
 
-        private Tile TransformSoRightSideIs(Tile tile, string side)
+        private static Tile TransformSoRightSideIs(Tile tile, string side)
         {
             return TransformSo(tile, side, GetRightSide);
         }
 
-        private Tile TransformSoTopIs(Tile tile, string side)
+        private static Tile TransformSoTopIs(Tile tile, string side)
         {
             return TransformSo(tile, side, GetTop);
         }
 
-        private Tile TransformSoLeftSideIs(Tile tile, string side)
+        private static Tile TransformSoLeftSideIs(Tile tile, string side)
         {
             return TransformSo(tile, side, GetLeftSide);
         }
@@ -204,12 +183,6 @@ namespace aoc2020.Code
             return rotated.Select(row => row.ToList()).ToList();
         }
 
-        private static void WriteToFile(string name, IEnumerable<IEnumerable<char>> transform)
-        {
-            var s = DataToString(transform);
-            File.WriteAllText($"C:\\Code\\aoc2020\\Log\\{name}.txt", s);
-        }
-
         public static string DataToString(IEnumerable<IEnumerable<char>> transform)
         {
             var sb = new StringBuilder();
@@ -227,9 +200,9 @@ namespace aoc2020.Code
             return s;
         }
 
-        private int CountNonMonsters(List<List<char>> markedMap)
+        private static int CountNonMonsters(List<List<char>> markedMap)
         {
-            return markedMap.Sum(row => row.Count(c => c == 'O'));
+            return markedMap.Sum(row => row.Count(c => c == '#'));
         }
 
         private (bool found, List<List<char>> markedMap) FindMonsters(List<List<char>> image)
@@ -237,7 +210,7 @@ namespace aoc2020.Code
             var height = Monster.Count;
             var width = Monster[0].Count;
             var copy = image.Select(row => row.Select(c => c).ToList()).ToList();
-            var found = false;
+            var foundAny = false;
 
             for (var y = 0; y < image.Count - height + 1; y++)
             {
@@ -268,30 +241,32 @@ namespace aoc2020.Code
                         }
                     }
 
-                    if (isMonster)
+                    if (!isMonster)
                     {
-                        found = true;
-                        for (var my = 0; my < height; my++)
+                        continue;
+                    }
+
+                    foundAny = true;
+                    for (var my = 0; my < height; my++)
+                    {
+                        for (var mx = 0; mx < width; mx++)
                         {
-                            for (var mx = 0; mx < width; mx++)
+                            var mc = Monster[my][mx];
+                            if (mc == '#')
                             {
-                                var mc = Monster[y][x];
-                                if (mc == '#')
-                                {
-                                    copy[y][x] = 'O';
-                                }
+                                copy[y + my][x + mx] = 'O';
                             }
                         }
                     }
                 }
             }
 
-            return found
+            return foundAny
                 ? (true, copy)
                 : (false, image);
         }
 
-        private List<List<List<char>>> GetTransforms(List<List<char>> original)
+        private static List<List<List<char>>> GetTransforms(List<List<char>> original)
         {
             var flipped = Flip(original);
             var results = new List<List<List<char>>> { original, flipped };
@@ -334,7 +309,7 @@ namespace aoc2020.Code
             return result;
         }
 
-        private List<List<char>> Assemble(List<List<int>> map, List<Tile> tiles)
+        private static List<List<char>> Assemble(List<List<int>> map, List<Tile> tiles)
         {
             var tileWidth = tiles[0].Data[0].Length;
             var tileHeight = tiles[0].Data.Length;
@@ -542,19 +517,10 @@ namespace aoc2020.Code
                 var side7 = string.Join("", side3.Reverse());
                 var side8 = string.Join("", side4.Reverse());
 
-                var sides = new List<string>
+                return new List<string>
                 {
-                    side1,
-                    side2,
-                    side3,
-                    side4,
-                    side5,
-                    side6,
-                    side7,
-                    side8,
+                    side1, side2, side3, side4, side5, side6, side7, side8
                 };
-
-                return sides;
             }
         }
 

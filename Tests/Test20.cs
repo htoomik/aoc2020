@@ -225,5 +225,14 @@ namespace aoc2020.Tests
             var result = solver.Solve(input);
             Output.WriteLine(result.ToString());
         }
+
+        [Fact]
+        public void Solve2()
+        {
+            var input = DataHelper.Get(20);
+            var solver = new Day20();
+            var result = solver.Solve2(input);
+            Output.WriteLine(result.ToString());
+        }
     }
 }
