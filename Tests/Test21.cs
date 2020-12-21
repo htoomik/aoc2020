@@ -26,12 +26,34 @@ sqjhc mxmxvkd sbzzf (contains fish)".ChopToList();
         }
 
         [Fact]
+        public void Part2()
+        {
+            var input = @"
+mxmxvkd kfcds sqjhc nhms (contains dairy, fish)
+trh fvjkl sbzzf mxmxvkd (contains dairy)
+sqjhc fvjkl (contains soy)
+sqjhc mxmxvkd sbzzf (contains fish)".ChopToList();
+            var solver = new Day21();
+            var result = solver.Solve2(input);
+            result.ShouldBe("mxmxvkd,sqjhc,fvjkl");
+        }
+
+        [Fact]
         public void Solve()
         {
             var input = DataHelper.GetAllRows(21);
             var solver = new Day21();
             var result = solver.Solve(input);
             Output.WriteLine(result.ToString());
+        }
+
+        [Fact]
+        public void Solve2()
+        {
+            var input = DataHelper.GetAllRows(21);
+            var solver = new Day21();
+            var result = solver.Solve2(input);
+            Output.WriteLine(result);
         }
     }
 }

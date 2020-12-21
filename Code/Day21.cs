@@ -8,20 +8,34 @@ namespace aoc2020.Code
     {
         public int Solve(List<string> input)
         {
-            var data = input.Select(Parse).ToList();
+            var foods = input.Select(Parse).ToList();
 
-            var safeIngredients = GetSafeIngredients(data);
-            var result = CountSafeIngredients(data, safeIngredients);
+            var allergenToIngredient = GetAllergenMap(foods);
 
+            return CountSafe(foods, allergenToIngredient);
+        }
+
+        public string Solve2(List<string> input)
+        {
+            var foods = input.Select(Parse).ToList();
+
+            var allergenToIngredient = GetAllergenMap(foods);
+
+            var list = allergenToIngredient.Select(kvp => kvp).OrderBy(kvp => kvp.Key).Select(kvp => kvp.Value);
+            var answer = string.Join(",", list);
+
+            return answer;
+        }
+
+        private static int CountSafe(List<Food> foods, Dictionary<string, string> allergenToIngredient)
+        {
+            var allIngredients = foods.SelectMany(d => d.Ingredients).Distinct();
+            var safeIngredients = allIngredients.Except(allergenToIngredient.Values);
+            var result = foods.Sum(f => f.Ingredients.Count(safeIngredients.Contains));
             return result;
         }
 
-        private static int CountSafeIngredients(List<Food> foods, IEnumerable<string> safeIngredients)
-        {
-            return foods.Sum(f => f.Ingredients.Count(safeIngredients.Contains));
-        }
-
-        private static IEnumerable<string> GetSafeIngredients(List<Food> original)
+        private static Dictionary<string, string> GetAllergenMap(List<Food> original)
         {
             var foods = original.Select(d => d.Clone()).ToList();
             var allIngredients = original.SelectMany(d => d.Ingredients).Distinct().ToList();
@@ -54,8 +68,7 @@ namespace aoc2020.Code
                 }
             }
 
-            var safe = allIngredients.Except(ingredientToAllergen.Keys);
-            return safe;
+            return allergenToIngredient;
         }
 
         private static Food Parse(string input)
