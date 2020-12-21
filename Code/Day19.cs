@@ -7,11 +7,27 @@ namespace aoc2020.Code
 {
     public class Day19
     {
-        public int Solve(string input)
+        public int Solve(string input, bool overrideRules)
         {
             var cleaned = input.Replace("\r", "");
             var sections = cleaned.Split("\n\n");
             var dict = ParseRules(sections[0]);
+
+            if (overrideRules)
+            {
+                dict[8] = "42 | " +
+                          "42 42 | " +
+                          "42 42 42 | " +
+                          "42 42 42 42 | " +
+                          "42 42 42 42 42 | " +
+                          "42 42 42 42 42 42";
+                dict[11] = "42 31 | " +
+                           "42 42 31 31 | " +
+                           "42 42 42 31 31 31 | " +
+                           "42 42 42 42 31 31 31 31 | " +
+                           "42 42 42 42 42 31 31 31 31 31 |" +
+                           "42 42 42 42 42 42 31 31 31 31 31 31";
+            }
 
             var expanded = Expand(dict[0], dict);
             var clean = expanded.Replace(" ", "");
