@@ -64,5 +64,14 @@ Player 2:
             var result = solver.Solve(input);
             Output.WriteLine(result.ToString());
         }
+
+        [Fact]
+        public void Solve2()
+        {
+            var input = DataHelper.Get(22);
+            var solver = new Day22();
+            var result = solver.Solve2(input);
+            Output.WriteLine(result.ToString());
+        }
     }
 }
