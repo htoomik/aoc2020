@@ -9,63 +9,93 @@ namespace aoc2020.Code
         {
             var data = input.ToCharArray().Select(c => int.Parse(c.ToString())).ToList();
             var maxValue = data.Max();
-            var current = 0;
+
+            var finalState = SolveInner(data, rounds, maxValue);
+
+            var pos1 = finalState.IndexOf(1);
+            var after1 = finalState.Skip(pos1 + 1);
+            var wrapped = finalState.Take(pos1);
+            var all = after1.Union(wrapped);
+            var result = string.Join("", all);
+            return result;
+        }
+
+        public long Solve2(string input)
+        {
+            const int maxValue = 1000000;
+            var data = input.ToCharArray().Select(c => int.Parse(c.ToString())).ToList();
+            for (var i = data.Count + 1; i <= maxValue; i++)
+            {
+                data.Add(i);
+            }
+
+            var finalState = SolveInner(data, 10000000, maxValue);
+
+            var pos1 = finalState.IndexOf(1);
+            var firstStar = finalState[pos1 + 1];
+            var secondStar = finalState[pos1 + 2];
+            var result = (long)firstStar * secondStar;
+            return result;
+        }
+
+        private static List<int> SolveInner(List<int> data, int rounds, int maxValue)
+        {
+            var dict = new Dictionary<int, int>();
+
+            for (var index = 0; index < data.Count - 1; index++)
+            {
+                dict[data[index]] = data[index + 1];
+            }
+
+            dict[data[^1]] = data[0];
+
             var currentVal = data[0];
             for (var i = 0; i < rounds; i++)
             {
                 var removed = new List<int>();
-                var pos = current + 1;
                 for (var j = 0; j < 3; j++)
                 {
-                    if (pos == data.Count)
-                    {
-                        pos = 0;
-                    }
-
-                    var r = data[pos];
-                    data.RemoveAt(pos);
+                    var r = dict[currentVal];
                     removed.Add(r);
+                    dict[currentVal] = dict[r];
+                    dict.Remove(r);
                 }
 
-                var destination = currentVal - 1;
-                if (destination == 0)
+                var destVal = currentVal - 1;
+                if (destVal == 0)
                 {
-                    destination = maxValue;
+                    destVal = maxValue;
                 }
-                while (removed.Contains(destination))
+
+                while (removed.Contains(destVal))
                 {
-                    destination--;
-                    if (destination == 0)
+                    destVal--;
+                    if (destVal == 0)
                     {
-                        destination = maxValue;
+                        destVal = maxValue;
                     }
                 }
 
-                var destPos = data.IndexOf(destination);
-                data.InsertRange(destPos + 1, removed);
-
-                while (data[current] != currentVal)
+                for (var index = 1; index <= removed.Count; index++)
                 {
-                    var first = data[0];
-                    data.RemoveAt(0);
-                    data.Add(first);
+                    var r = removed[^index];
+                    var currentNext = dict[destVal];
+                    dict[destVal] = r;
+                    dict[r] = currentNext;
                 }
 
-                current = data.IndexOf(currentVal) + 1;
-                if (current == data.Count())
-                {
-                    current = 0;
-                }
-
-                currentVal = data[current];
+                currentVal = dict[currentVal];
             }
 
-            var pos1 = data.IndexOf(1);
-            var after1 = data.Skip(pos1 + 1);
-            var wrapped = data.Take(pos1);
-            var all = after1.Union(wrapped);
-            var result = string.Join("", all);
-            return result;
+            var results = new List<int>();
+            var current = 1;
+            for(var i = 0; i < maxValue; i++)
+            {
+                results.Add(current);
+                current = dict[current];
+            }
+
+            return results;
         }
     }
 }

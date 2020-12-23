@@ -23,12 +23,30 @@ namespace aoc2020.Tests
         }
 
         [Fact]
+        public void Part2()
+        {
+            const string input = "389125467";
+            var solver = new Day23();
+            var result = solver.Solve2(input);
+            result.ShouldBe(149245887792);
+        }
+
+        [Fact]
         public void Solve()
         {
             const string input = "643719258";
             var solver = new Day23();
             var result = solver.Solve(input, 100);
-            Output.WriteLine(result);
+            Output.WriteLine(result); // 54896723
+        }
+
+        [Fact]
+        public void Solve2()
+        {
+            const string input = "643719258";
+            var solver = new Day23();
+            var result = solver.Solve2(input);
+            Output.WriteLine(result.ToString());
         }
     }
 }
